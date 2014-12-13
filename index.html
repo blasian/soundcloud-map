@@ -52,7 +52,13 @@
                 stylers: [
                     { visibility: "off" }
                 ]
-            }
+            },{
+                featureType: "administrative",
+                elementType: "geometry",
+                stylers: [
+                  { visibility: "off" }
+                ]
+              }
             ];
 
             map = new google.maps.Map(document.getElementById('map-canvas'),
