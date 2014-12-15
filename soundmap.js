@@ -100,7 +100,7 @@
 
     // Mark location onto map
     function gcode(country) {
-        var infowindow = new google.maps.InfoWindow();
+        if (country == "United States") {country = "USA";}
     	geocoder.geocode( { 'address': country }, function(results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
                 var marker = new google.maps.Marker({
