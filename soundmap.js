@@ -1,17 +1,20 @@
 var map;
 var marker;
 var geocoder;
-var addresses = [];
+var locations = [];
+var offset = 10;
 
 SC.initialize({
 	client_id: "64a4fa9fc8c9797be3c6dc27067c131c",
 });
 
 function initialize() {
+    // Populating locations array
+    findLocations();
     geocoder = new google.maps.Geocoder();
     var mapOptions = {
         center: { lat: 0, lng: 0},
-        zoom: 2,
+        zoom: 3,
         disableDefaultUI: true,
         zoomControl: false,
         scaleControl: false,
@@ -19,6 +22,7 @@ function initialize() {
         disableDoubleClickZoom: true
     };
 
+    // Map styling
     var styles = [
     {
         stylers: [
@@ -61,23 +65,38 @@ function initialize() {
       }
     ];
 
+    // Creating map
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
     map.setOptions({styles: styles});
 }
 
-function locate() {
-	// Get locations
-	SC.get("/tracks", function(tracks){
-		for (var i = 0; i < tracks.length; i++) {
-			SC.get("/users/" + tracks[i].user_id, function(user){
-				if (user.country) {	gcode(user.country) };
-			});
-		}
-	});
+// Create locations array
+function findLocations() {
+    SC.get("/tracks", { limit: 10, offset: offset }, function(tracks){
+        offset += 10;
+        for (var i = 0; i < tracks.length; i++) {
+            SC.get("/users/" + tracks[i].user_id, function(user){
+                if (user.country) { 
+                    locations.push(user.country);
+                }
+            });
+        }
+    });
 }
 
+// Add next location to map
+function locate() {
+    console.log(locations);
+    if (locations.length > 0) {
+        gcode(locations.pop());
+    } else {
+        findLocations();
+        locate();
+    }
+}
+
+// Mark location onto map
 function gcode(country) {
-	// Mark locations onto map
 	geocoder.geocode( { 'address': country }, function(results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
             map.setCenter(results[0].geometry.location);
